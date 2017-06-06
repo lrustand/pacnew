@@ -6,11 +6,11 @@ call("updatedb")
 pacnew_files = Popen('locate --existing --regex "\.pac(new)$"', shell=True,
                      stdout=PIPE).stdout.read().decode("UTF-8").split()
 
-print("The following configuration files have updates available:\n  " +
+print("==> The following configuration files have updates available:\n  " +
       "\n  ".join(pacnew_files))
 
 while 1:
-    c = input("Continue? [Y/n]")
+    c = input(":: Continue? [Y/n]")
     if c.lower() in ["","y","yes"]:
         break
     else:
@@ -20,17 +20,17 @@ for pacnew in pacnew_files:
     original = pacnew[:-7]
     call("diff --color "+original+" "+pacnew, shell=True)
 
-    print("\nFile: "+original+"\n")
+    print("\n==> File: "+original)
 
     answered = False
     while not answered:
-        action = input("(E)dit, (k)eep current, (r)eplace, (s)kip, (q)uit?\
-                       [E/k/r/s/q]").lower()
+        action = input(":: (E)dit, (k)eep current, (r)eplace, (s)kip, (q)uit?"+\
+                       " [E/k/r/s/q]").lower()
 
         if action in ["e",""]:
             returncode = call("snvim -d "+original+" "+pacnew, shell=True)
             if returncode == 0:
-                d = input("Delete .pacnew file now? [y/n]").lower()
+                d = input(":: Delete .pacnew file now? [y/n]").lower()
                 if d == "y":
                     call("rm "+pacnew)
         elif action == "k":
