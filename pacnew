@@ -1,0 +1,44 @@
+#!/usr/bin/python
+import os
+from subprocess import Popen,PIPE,call
+#pacnew_files = Popen("find /etc | grep pacnew$", shell=True,
+call("updatedb")
+pacnew_files = Popen('locate --existing --regex "\.pac(new)$"', shell=True,
+                     stdout=PIPE).stdout.read().decode("UTF-8").split()
+
+print("The following configuration files have updates available:\n  " +
+      "\n  ".join(pacnew_files))
+
+while 1:
+    c = input("Continue? [Y/n]")
+    if c.lower() in ["","y","yes"]:
+        break
+    else:
+        exit()
+
+for pacnew in pacnew_files:
+    original = pacnew[:-7]
+    call("diff --color "+original+" "+pacnew, shell=True)
+
+    print("\nFile: "+original+"\n")
+
+    answered = False
+    while not answered:
+        action = input("(E)dit, (k)eep current, (r)eplace, (s)kip, (q)uit?\
+                       [E/k/r/s/q]").lower()
+
+        if action in ["e",""]:
+            returncode = call("snvim -d "+original+" "+pacnew, shell=True)
+            if returncode == 0:
+                d = input("Delete .pacnew file now? [y/n]").lower()
+                if d == "y":
+                    call("rm "+pacnew)
+        elif action == "k":
+            call("rm "+pacnew, shell=True)
+        elif action == "r":
+            call("mv "+pacnew+" "+original, shell=True)
+        elif action == "q":
+            exit()
+        if action in ["e","k","r","s","q"]:
+            answered = True
+
